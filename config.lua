@@ -15,11 +15,14 @@ Config.Airdrops = {
         groups = {'admin', 'superadmin'}
     },
     OnlyCommand = false, -- true = only admins with commands can spawn in airdrops | false = time interval between automatic spawn (command will also be active)
+    CoordsOfCommand = true, -- Spawn Airdrop on command executor's location
     Cooldown = { min = 5, max = 15 }, -- Minutes | Cooldown time before next airdrop spawns in | Default: { min = 5, max = 15 }
     CommandRestart = false, -- Does Command (if enabled) restart Cooldown time of next airdrop | Default: false
     FallSpeed = 1, -- Try modifying this to see how fast You want the Airdrop to go down | Lowering number, means slowing down airdrop fall speed | Default: 1
     SpawnOffline = false, -- Will Airdrops spawn when there're no players online | Default: false
     CollectTime = 10, -- Time it takes to pickup airdrop | Seconds
+    DeletePrevious = false, -- Deletes Previous Airdrop if new is spawned
+    UseFlareParticles = true,
 }
 
 -- Locations of where the Airdrops can spawn
@@ -64,23 +67,10 @@ Config.Notification = function(msg) -- Client Side | Custom Notification if You 
     TriggerEvent('esx:showNotification', msg)
 end
 
-Config.ProgressBar = function(msg, time) -- Client Side | Custom Progress Bar | By Default: OX Inventory Progress Bar
-    local wait = true
-    local completed = true
+Config.ProgressBar = function(msg, time) -- Client Side | Custom Progress Bar | This function can return true (Airdrop will be looted) or false (Airdrop won't be looted)
+    Citizen.Wait(1000)
 
-    exports['ox_inventory']:Progress({
-        duration = time,
-        label = msg,
-        useWhileDead = false,
-        canCancel = true,
-    }, function(cancel)
-        wait = false
-        completed = not cancel
-    end)
-
-    while wait do Citizen.Wait(10) end
-
-    return completed
+    return true
 end
 
 Config.NotifyPlayers = function(msg, coords) -- Server Side | Should be perhaps some kind of email to the player's phone | For testing it is made as Default ESX Notification

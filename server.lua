@@ -23,10 +23,14 @@ RegisterNetEvent('bryan_airdrops:pickupAirdrop', function(id)
     local airdrop = GetAirdrop(id)
 
     if airdrop then
-        RewardPlayer(source, GetAirdrop(id).items)
+        RewardPlayer(source, airdrop.items)
         RemoveAirdrop(id)
         TriggerClientEvent('bryan_airdrops:removeObject', -1, id)
         TriggerClientEvent('bryan_airdrops:syncAirdrops', -1, airdrops)
+    else
+        if Config.Debug then
+            print('Could not find airdrop by it\'s ID')
+        end
     end
 end)
 
@@ -58,8 +62,16 @@ if Config.Airdrops.Command.enabled then
         if Config.Debug then print(args.lootTable == nil, Config.LootTables[args.lootTable] ~= nil) end
         if args.lootTable == nil or Config.LootTables[args.lootTable] ~= nil then
             if Config.Airdrops.Command.CommandRestart then RestartCooldown() end
-            SpawnAirdrop(args.lootTable)
-            Config.NotifyExecute(xPlayer.source, xPlayer)
+
+            if Config.Airdrops.CoordsOfCommand and (xPlayer and xPlayer.source) then
+                SpawnAirdrop(args.lootTable, GetEntityCoords(GetPlayerPed(xPlayer.source)) + vector3(0.0, 0.0, 150.0))
+            else
+                SpawnAirdrop(args.lootTable)
+            end
+
+            if xPlayer and xPlayer.source then
+                Config.NotifyExecute(xPlayer.source, xPlayer)
+            end
         else
             showError(_U('command_error_loottable_not_found', args.lootTable))
         end
@@ -68,21 +80,31 @@ if Config.Airdrops.Command.enabled then
     }})
 end
 
-SpawnAirdrop = function(lootTable)
+SpawnAirdrop = function(lootTable, customCoords)
     local randomLocation = Config.Locations[math.random(1, #Config.Locations)]
     local isLocationTaken = IsLocationTaken(randomLocation)
     
     if Config.Debug then print(tryCount > 10, not isLocationTaken) end
-    if tryCount > 10 or not isLocationTaken then
+    if tryCount > 10 or not isLocationTaken or customCoords then
         tryCount = 0
         
         local airdropId = math.random(10000, 99999)
         local airdropItems = SelectLoottable(lootTable)
 
+        local coords = randomLocation
+
+        if customCoords then coords = customCoords
+        elseif coords.z < 150.0 then coords.z = 200.0 end
+
+        if Config.Airdrops.DeletePrevious then
+            TriggerClientEvent('bryan_airdrops:removeAllObjects', -1)
+            airdrops = {}
+        end
+
         table.insert(airdrops, {
             id = airdropId,
             items = airdropItems,
-            coords = randomLocation
+            coords = coords
         })
 
         if Config.Debug then print('Airdrop Spawned') end

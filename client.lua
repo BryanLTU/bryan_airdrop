@@ -22,6 +22,14 @@ RegisterNetEvent('bryan_airdrops:removeObject', function(id)
     RemoveObject(id)
 end)
 
+RegisterNetEvent('bryan_airdrops:removeAllObjects', function()
+    for k, v in pairs(airdrops) do
+        RemoveObject(v.id)
+    end
+
+    airdrops = {}
+end)
+
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName == GetCurrentResourceName() then
         for k, v in pairs(airdrops) do
@@ -97,13 +105,25 @@ SpawnObject = function(id, coords)
 
     local model = GetHashKey(Config.Object)
 
-    ESX.Streaming.RequestModel(model)
+    RequestModel(model)
+    while not HasModelLoaded(model) do Citizen.Wait(10) end
 
     local obj = CreateObject(model, coords.x, coords.y, coords.z, false, false, true)
 
     if Config.Debug then print('Object Spawned') end
     FreezeEntityPosition(obj, true)
     airdrops[id].object = obj
+
+    if Config.Airdrops.UseFlareParticles then
+        RequestNamedPtfxAsset('core')
+        while not HasNamedPtfxAssetLoaded('core') do Citizen.Wait(10) end
+
+        if Config.Debug then print('Particles Loaded') end
+
+        UseParticleFxAssetNextCall("core")
+        SetParticleFxNonLoopedColour(1.0, 0.0, 0.0)
+        StartParticleFxLoopedOnEntity('weap_heist_flare_trail', obj, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+    end
 end
 
 AddBlip = function(id, coords)
