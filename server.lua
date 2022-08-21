@@ -94,7 +94,7 @@ SpawnAirdrop = function(lootTable, customCoords)
         local coords = randomLocation
 
         if customCoords then coords = customCoords
-        elseif coords.z < 150.0 then coords.z = 200.0 end
+        elseif coords.z < 150.0 then coords = vector3(randomLocation.x, randomLocation.y, 200.0) end
 
         if Config.Airdrops.DeletePrevious then
             TriggerClientEvent('bryan_airdrops:removeAllObjects', -1)
