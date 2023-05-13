@@ -3,7 +3,7 @@ Config = {}
 Config.FrameworkObj = 'esx:getSharedObject'
 Config.PlayerLoaded = 'esx:playerLoaded'
 
-Config.Locale = 'en'
+Config.Locale = 'en' --en/fr/es
 
 -- Default: false | This just prints things in console
 Config.Debug = false
