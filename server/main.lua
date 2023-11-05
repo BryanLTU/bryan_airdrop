@@ -90,10 +90,10 @@ SpawnAirdrop = function(lootTable, customCoords)
     if tryCount > 10 or not isLocationTaken or customCoords then
         tryCount = 0
         
+        local coords = customCoords or randomLocation
         local closestPlayer = _GetClosestPlayer(coords)
         local lootTableId = lootTable or GetRandomLootTableId()
         local airdropId, airdropType = GetLatestAirdropId(), GetAirdropType(lootTableId)
-        local coords = customCoords or randomLocation
 
         if coords.z < 150.0 then coords.z = 150.0 end
 

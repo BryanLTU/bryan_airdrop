@@ -3,7 +3,7 @@ _Notification = function(msg, type)
 end
 
 _AddRadius = function(coords)
-    local blip = AddBlipForRadius(coords.x, coords.y, , coords.z, Config.Radius)
+    local blip = AddBlipForRadius(coords.x, coords.y, coords.z, Config.Radius)
 
     return blip
 end
