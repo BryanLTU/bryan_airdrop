@@ -8,10 +8,9 @@ version '1.1.0'
 description 'Script that allows Airdrops to fall and players fight over it'
 
 shared_scripts {
+    '@ox_lib/init.lua',
     'config.lua',
-    '@es_extended/imports.lua',
-    '@es_extended/locale.lua',
-    'locales/*.lua'
+    'locales/*.lua',
 }
 client_script 'client.lua'
 server_script 'server.lua'
