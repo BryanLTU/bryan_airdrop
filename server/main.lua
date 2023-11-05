@@ -1,60 +1,7 @@
 ESX = exports['es_extended']:getSharedObject()
-local airdrops = {}
+local Airdrops = {}
 local tryCount = 0
-local cooldown = math.random(Config.Airdrops.Cooldown.min, Config.Airdrops.Cooldown.max)
-
-AddEventHandler('onResourceStart', function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        if Config.Debug then print(string.format('%s Started Successfully | Server Side', GetCurrentResourceName())) end
-
-        if not Config.Airdrops.OnlyCommand then
-            Citizen.CreateThread(function() StartAirdropLoop(); end)
-        end
-    end
-end)
-
-RegisterNetEvent('esx:playerLoaded', function(playerId, xPlayer)
-    TriggerClientEvent('bryan_airdrops:syncAirdrops', playerId, airdrops)
-end)
-
-RegisterNetEvent('bryan_airdrops:pickupAirdrop', function(id)
-    local airdrop = GetAirdrop(id)
-
-    if airdrop then
-        RewardPlayer(source, airdrop.items)
-        RemoveAirdrop(id)
-        TriggerClientEvent('bryan_airdrops:removeObject', -1, id)
-        TriggerClientEvent('bryan_airdrops:syncAirdrops', -1, airdrops)
-    else
-        if Config.Debug then
-            print('Could not find airdrop by it\'s ID')
-        end
-    end
-end)
-
-RegisterNetEvent('bryan_airdrops:airdropLanded', function(id)
-    local airdropIndex = GetAirdropIndex(id)
-
-    airdrops[airdropIndex].landed = true
-end)
-
-StartAirdropLoop = function()
-    while true do
-        while cooldown > 0 do
-            if Config.Debug then print(string.format('%s Minutes Till Next Airdrop Spawn', cooldown)) end
-            Citizen.Wait(60 * 1000)
-            cooldown = cooldown - 1
-        end
-
-        RestartCooldown()
-
-        if Config.SpawnOffline or (not Config.SpawnOffline and #GetPlayers() > 0) then
-            SpawnAirdrop()
-        end
-
-        Citizen.Wait(10)
-    end
-end
+local cooldown = Config.Cooldown * 60 * 1000
 
 if Config.Command.Enabled then
     lib.addCommand(Config.Command.Name, {
@@ -89,46 +36,115 @@ if Config.Command.Enabled then
     end)
 end
 
+AddEventHandler('onResourceStart', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        if Config.Debug then print(string.format('%s Started Successfully | Server Side', GetCurrentResourceName())) end
+
+        if not Config.OnlyCommand then
+            Citizen.CreateThread(function() StartAirdropLoop(); end)
+        end
+    end
+end)
+
+RegisterNetEvent('bryan_airdrops:pickupAirdrop', function(id)
+    local airdrop = GetAirdrop(id)
+
+    if airdrop then
+        RewardPlayer(source, airdrop.items)
+        RemoveAirdrop(id)
+        TriggerClientEvent('bryan_airdrops:removeObject', -1, id)
+        TriggerClientEvent('bryan_airdrops:syncAirdrops', -1, airdrops)
+    else
+        if Config.Debug then
+            print('Could not find airdrop by it\'s ID')
+        end
+    end
+end)
+
+StartAirdropLoop = function()
+    while true do
+        while cooldown > 0 do
+            if Config.Debug then print(string.format('%s Minutes Till Next Airdrop Spawn', cooldown)) end
+            Citizen.Wait(60 * 1000)
+            cooldown = cooldown - 1
+        end
+
+        RestartCooldown()
+
+        if Config.SpawnOffline or (not Config.SpawnOffline and #GetPlayers() > 0) then
+            SpawnAirdrop()
+        end
+
+        Citizen.Wait(10)
+    end
+end
+
 SpawnAirdrop = function(lootTable, customCoords)
-    local randomLocation = Config.Locations[math.random(1, #Config.Locations)]
+    local randomLocation = GetRandomAirdropLocation()
     local isLocationTaken = IsLocationTaken(randomLocation)
     
     if Config.Debug then print(tryCount > 10, not isLocationTaken) end
+    
     if tryCount > 10 or not isLocationTaken or customCoords then
         tryCount = 0
         
-        local airdropId = math.random(10000, 99999)
-        local airdropItems = SelectLoottable(lootTable)
+        local closestPlayer = _GetClosestPlayer(coords)
+        local lootTableId = lootTable or GetRandomLootTableId()
+        local airdropId, airdropType = GetLatestAirdropId(), GetAirdropType(lootTableId)
+        local coords = customCoords or randomLocation
 
-        local coords = randomLocation
+        if coords.z < 150.0 then coords.z = 150.0 end
 
-        if customCoords then coords = customCoords
-        elseif coords.z < 150.0 then coords = vector3(randomLocation.x, randomLocation.y, 200.0) end
+        if Config.RemovePreviousAirdrops then RemoveAirdrops() end
 
-        if Config.RemovePreviousAirdrops then
-            TriggerClientEvent('bryan_airdrops:removeAllObjects', -1)
-            airdrops = {}
+        local object = nil
+        
+        if airdropType == 'items' then
+            object = CreateObject(GetHashKey(Config.ObjectModel), coords.x, coords.y, coords.z, true, false, false)
+        elseif airdropType == 'vehicle' then
+            object = CreateVehicle(GetHashKey(GetAirdropVehicle(lootTableId)), coords.x, coords.y, coords.z, 0.0, true, false)
         end
 
-        table.insert(airdrops, {
+        if object == nil then return end
+        
+        while not DoesEntityExist(object) do Wait(0) end
+
+        if airdropType == 'vehicle' then
+            local parachute = CreateObject(GetHashKey('p_parachute1_mp_dec'), coords.x, coords.y, coords.z, true, false, false)
+            while not DoesEntityExist(parachute) do Wait(0) end
+
+            TriggerClientEvent('bryan_airdrop:client:attachParachute', closestPlayer, NetworkGetNetworkIdFromEntity(object), NetworkGetNetworkIdFromEntity(parachute))
+        end
+
+        FreezeEntityPosition(object, true)
+
+        table.insert(Airdrops, {
             id = airdropId,
-            items = airdropItems,
-            coords = coords
+            lootTableId = lootTableId,
+            type = airdropType,
+            coords = coords,
+            object = object,
         })
 
+        if Config.Particles then
+            if closestPlayer then
+                TriggerClientEvent('bryan_airdrop:client:startParticles', closestPlayer, NetworkGetNetworkIdFromEntity(object))
+            end
+        end
+
+        TriggerClientEvent('bryan_airdrop:client:addBlips', -1, coords)
+
         if Config.Debug then print('Airdrop Spawned') end
-        TriggerClientEvent('bryan_airdrops:syncAirdrops', -1, airdrops)
-        Config.NotifyPlayers(_U('notification_airdrop_spawned'))
 
         Citizen.CreateThread(function()
-            local airdropIndex = GetAirdropIndex(airdropId)
+            while DoesEntityExist(object) do -- TODO Check if above ground
+                SetEntityCoords(object, coords.x, coords.y, coords.z - (0.01 * Config.FallSpeed))
 
-            while not airdrops[airdropIndex].landed do
-                airdrops[airdropIndex].coords = airdrops[airdropIndex].coords - vector3(0.0, 0.0, 0.01 * Config.Airdrops.FallSpeed)
                 Citizen.Wait(1)
             end
 
             if Config.Debug then print(string.format('Airdrop (ID: %s) Landed', airdrops[airdropIndex].id)) end
+            -- TODO Event for landed airdrop
         end)
     elseif isLocationTaken then 
         tryCount = tryCount + 1
@@ -136,8 +152,59 @@ SpawnAirdrop = function(lootTable, customCoords)
     end
 end
 
+GetRandomAirdropLocation = function()
+    local randomIndex = math.random(1, #Config.Locations)
+    
+    return Config.Locations[randomIndex]
+end
+
+GetLatestAirdropId = function()
+    local latestId = 0
+
+    for k, v in ipairs(Airdrops) do
+        if latestId <= v.id then
+            latestId = v.id + 1
+        end
+    end
+
+    return latestId
+end
+
+GetAirdropType = function(lootTableId)
+    for k, v in ipairs(Config.LootTables) do
+        if v.id == lootTableId then
+            return v.type
+        end
+    end
+
+    return nil
+end
+
+GetAirdropVehicle = function(lootTableId)
+    for k, v in ipairs(Config.LootTables) do
+        if v.id == lootTableId then
+            return v.vehicle
+        end
+    end
+
+    return nil
+end
+
+GetRandomLootTableId = function()
+    local randomLootTable
+    local myChance = math.random(0, 100)
+
+    while not randomLootTable or myChance > randomLootTable.chance do
+        Citizen.Wait(10)
+
+        randomLootTable = Config.LootTables[math.random(1, #Config.LootTables)]
+    end
+
+    return randomLootTable.id
+end
+
 IsLocationTaken = function(location)
-    for k, v in pairs(airdrops) do
+    for k, v in ipairs(Airdrops) do
         if v.coords == location then
             return true
         end
@@ -146,37 +213,31 @@ IsLocationTaken = function(location)
     return false
 end
 
-SelectLoottable = function(lootTable)
-    if lootTable ~= nil then
-        return Config.LootTables[lootTable].Items
-    else
-        local randomLootTable = Config.LootTables[math.random(1, #Config.LootTables)]
-        local chance = math.random(1, 100)
-
-        while randomLootTable.Chance < chance do
-            Citizen.Wait(10)
-            
-            randomLootTable = Config.LootTables[math.random(1, #Config.LootTables)]
-            chance = math.random(1, 100)
-
-            if Config.Debug then print('searching ' .. randomLootTable.Chance < chance) end
-        end
-
-        return randomLootTable.Items
-    end
-end
-
 RestartCooldown = function()
-    cooldown = math.random(Config.Airdrops.Cooldown.min, Config.Airdrops.Cooldown.max)
+    cooldown = Config.Cooldown * 60 * 1000
 end
 
-RemoveAirdrop = function(id)
-    for k, v in pairs(airdrops) do
-        if v.id == id then
-            airdrops[k] = nil
+RemoveAirdrop = function(airdropId)
+    for k, v in ipairs(Airdrops) do
+        if v.id == airdropId then
+            DeleteEntity(v.object)
+            TriggerClientEvent('bryan_airdrop:client:removeBlipsWithAirdropId', -1, v.id)
+
+            table.remove(Airdrops, k)
+
             break
         end
     end
+end
+
+RemoveAirdrops = function()
+    for k, v in ipairs(Airdrops) do
+        DeleteEntity(v.object)
+    end
+
+    TriggerClientEvent('bryan_airdrop:client:removeAllBlips', -1)
+
+    Airdrops = {}
 end
 
 RewardPlayer = function(source, items)
@@ -197,16 +258,6 @@ GetAirdrop = function(id)
     for k, v in pairs(airdrops) do
         if v.id == id then
             return v
-        end
-    end
-
-    return nil
-end
-
-GetAirdropIndex = function(id)
-    for k, v in pairs(airdrops) do
-        if v.id == id then
-            return k
         end
     end
 

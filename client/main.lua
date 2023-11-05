@@ -1,5 +1,6 @@
 ESX = exports['es_extended']:getSharedObject()
 local airdrops = {}
+local Blips = {}
 
 Citizen.CreateThread(function()
     while ESX.GetPlayerData().job == nil do Citizen.Wait(100) end
@@ -9,62 +10,57 @@ Citizen.CreateThread(function()
     if Config.Debug then print(string.format('%s Started Successfully | Client Side', GetCurrentResourceName())) end
 end)
 
-RegisterNetEvent('bryan_airdrops:syncAirdrops', function(airdropsSv)
-    airdrops = airdropsSv
-end)
-
-RegisterNetEvent('bryan_airdrops:removeObject', function(id)
-    RemoveObject(id)
-end)
-
-RegisterNetEvent('bryan_airdrops:removeAllObjects', function()
-    for k, v in pairs(airdrops) do
-        RemoveObject(v.id)
+RegisterNetEvent('bryan_airdrop:client:addBlips', function(airdropId, coords)
+    if Config.Blip then
+        table.insert(Blips, {
+            airdropId = airdropId,
+            blip = _AddBlip(coords),
+        })
     end
 
-    airdrops = {}
-end)
-
-AddEventHandler('onResourceStop', function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        for k, v in pairs(airdrops) do
-            if v.object then
-                RemoveObject(v.id)
-            end
-        end
+    if Config.Radius then
+        table.insert(Blips, {
+            airdropId = airdropId,
+            blip = _AddRadius(coords)
+        })
     end
 end)
 
-StartScript = function()
-    while true do
-        local wait = 1000
+RegisterNetEvent('bryan_airdrop:client:removeBlipsWithAirdropId', function(airdropId)
+    RemoveBlips(airdropId)
+end)
 
-        if #airdrops > 0 then
-            wait = 1
+RegisterNetEvent('bryan_airdrop:client:removeAllBlips', function()
+    RemoveBlips()
+end)
 
-            for k, v in pairs(airdrops) do
-                if not v.landed then
-                    airdrops[k].coords = airdrops[k].coords - vector3(0.0, 0.0, 0.01 * Config.Airdrops.FallSpeed)
-                end
+RegisterNetEvent('bryan_airdrop:client:notification', function(msg, type)
+    _Notification(msg, type)
+end)
 
-                if v.object and DoesEntityExist(v.object) then
-                    if GetEntityHeightAboveGround(v.object) > 0.2 then
-                        SetEntityCoords(v.object, v.coords.x, v.coords.y, v.coords.z, 0.0, 0.0, 0.0, false)
-                    elseif not v.landed then
-                        airdrops[k].landed = true
-                        TriggerServerEvent('bryan_airdrops:airdropLanded', v.id)
-                    end
-                elseif not v.spawning and GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), v.coords, true) <= 50.0 then
-                    SpawnObject(k, v.coords)
-                end
+RegisterNetEvent('bryan_airdrop:client:startParticles', function(airdropNetId)
+    local object = NetworkGetEntityFromNetworkId(airdropNetId)
 
-                if not v.blip then
-                    AddBlip(k, v.coords)
-                end
-            end
+    RequestNamedPtfxAsset('core')
+    while not HasNamedPtfxAssetLoaded('core') do Citizen.Wait(10) end
+
+    UseParticleFxAssetNextCall("core")
+    SetParticleFxNonLoopedColour(1.0, 0.0, 0.0)
+    StartNetworkedParticleFxLoopedOnEntity('weap_heist_flare_trail', object, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+end)
+
+RegisterNetEvent('bryan_airdrop:client:attachParachute', function(vehicleNetId, parachuteNetId)
+    local vehicle, parachute = NetworkGetEntityFromNetworkId(vehicleNetId), NetworkGetEntityFromNetworkId(parachuteNetId)
+
+    AttachEntityToEntity(parachute, vehicle, GetEntityBoneIndexByName(vehicle, 'roof'), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, false, false, GetEntityRotation(vehicle), true)
+end)
+
+RemoveBlips = function(airdropId)
+    for k, v in ipairs(Blips) do
+        if not airdropId or (airdropId and v.airdropId == airdropId) then
+            RemoveBlip(v.blip)
+            table.remove(Blips, k)
         end
-
-        Citizen.Wait(wait)
     end
 end
 
@@ -92,57 +88,5 @@ ShowLocations = function()
         end
 
         Citizen.Wait(wait)
-    end
-end
-
-SpawnObject = function(id, coords)
-    airdrops[id].spawning = true
-
-    local model = GetHashKey(Config.ObjectModel)
-
-    RequestModel(model)
-    while not HasModelLoaded(model) do Citizen.Wait(10) end
-
-    local obj = CreateObject(model, coords.x, coords.y, coords.z, false, false, true)
-
-    if Config.Debug then print('Object Spawned') end
-    FreezeEntityPosition(obj, true)
-    airdrops[id].object = obj
-
-    if Config.Airdrops.UseFlareParticles then
-        RequestNamedPtfxAsset('core')
-        while not HasNamedPtfxAssetLoaded('core') do Citizen.Wait(10) end
-
-        if Config.Debug then print('Particles Loaded') end
-
-        UseParticleFxAssetNextCall("core")
-        SetParticleFxNonLoopedColour(1.0, 0.0, 0.0)
-        StartParticleFxLoopedOnEntity('weap_heist_flare_trail', obj, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
-    end
-end
-
-AddBlip = function(id, coords)
-    if Config.Blip then
-        local blip = AddBlipForCoord(coords)
-        SetBlipSprite(blip, 306)
-        SetBlipColour(blip, 28)
-        SetBlipScale(blip, 0.8)
-        SetBlipDisplay(blip, 4)
-        SetBlipAsShortRange(blip, true)
-
-        BeginTextCommandSetBlipName('STRING')
-        AddTextComponentString(_U('blip_name')) 
-        EndTextCommandSetBlipName(blip)
-
-        airdrops[id].blip = blip
-    end
-end
-
-RemoveObject = function(id)
-    for k, v in pairs(airdrops) do
-        if v.id == id then
-            ESX.Game.DeleteObject(v.object)
-            if Config.Blip then RemoveBlip(v.blip) end
-        end
     end
 end

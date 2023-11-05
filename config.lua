@@ -2,7 +2,6 @@ Config = {}
 
 Config.Locale = 'en' --en/fr/es
 
--- Default: false | This just prints things in console
 Config.Debug = false
 
 Config.ObjectModel = 'prop_drop_armscrate_01'   -- Model to spawn in for the falling object
@@ -19,7 +18,9 @@ Config.RemovePreviousAirdrops = false           -- Should all previous airdrops 
 
 Config.Blip = false                             -- Blip will be displayed in exact location of the airdrop
 
-Config.Radius = true                            -- Radius will be displayed around the area of the airdrop
+Config.Radius = 20.0                            -- (Radius | false) Radius Blip will be displayed around the area of the airdrop
+
+Config.Particles = true                         -- Particles that will be played while the airdrop is falling
 
 Config.Command = {
     Enabled         = true,                     -- Is Command enabled
