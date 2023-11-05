@@ -134,13 +134,14 @@ SpawnAirdrop = function(lootTable, customCoords)
             end
         end
 
-        TriggerClientEvent('bryan_airdrop:client:addBlips', -1, coords)
+        TriggerClientEvent('bryan_airdrop:client:addBlips', -1, airdropId, coords)
 
         if Config.Debug then print('Airdrop Spawned') end
 
         Citizen.CreateThread(function()
             while DoesEntityExist(object) do -- TODO Check if above ground
-                SetEntityCoords(object, coords.x, coords.y, coords.z - (0.01 * Config.FallSpeed))
+                local currentCoords = GetEntityCoords(object)
+                SetEntityCoords(object, currentCoords.x, currentCoords.y, currentCoords.z - (0.01 * Config.FallSpeed))
 
                 Citizen.Wait(1)
             end
