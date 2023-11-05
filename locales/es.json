@@ -1,0 +1,9 @@
+{
+    "command_help": "Desplegar un Suministro Aéreo",
+    "command_args_lootTable": "ID de Botín en la Tabla | No Necesario",
+    "command_error_loottable_not_found": "(ID: %s) de Botín No Encontrado en la Tabla",
+    "3d_press_to_pickup": "Presiona E para coger el Suministro Aéreo",
+    "progress_bar_picking_up": "Cogiendo el Suministro Aéreo",
+    "notification_airdrop_spawned": "¡Un Suministro Aéreo ha sido Desplegado!",
+    "blip_name": "Suministro Aéreo"
+}

@@ -76,10 +76,10 @@ ShowLocations = function()
 
                 if distance <= 3.0 then
                     wait = 2
-                    ESX.Game.Utils.DrawText3D(v.coords, _U('3d_press_to_pickup'), 0.8, 4)
+                    ESX.Game.Utils.DrawText3D(v.coords, locale('3d_press_to_pickup'), 0.8, 4)
 
                     if IsControlJustPressed(1, 51) then
-                        Config.ProgressBar(_U('progress_bar_picking_up'), Config.Airdrops.CollectTime * 1000)
+                        Config.ProgressBar(locale('progress_bar_picking_up'), Config.Airdrops.CollectTime * 1000)
 
                         TriggerServerEvent('bryan_airdrops:pickupAirdrop', v.id)
                     end

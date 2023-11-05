@@ -1,0 +1,9 @@
+{
+    "command_help": "Spawn An Airdrop",
+    "command_args_lootTable": "Loot Table ID | Not Necessary",
+    "command_error_loottable_not_found": "Loot Table (ID: %s) Not Found",
+    "3d_press_to_pickup": "Press E To Pickup Airdrop",
+    "progress_bar_picking_up": "Picking Up The Airdrop",
+    "notification_airdrop_spawned": "Airdrop has been Called In!",
+    "blip_name": "Airdrop"
+}

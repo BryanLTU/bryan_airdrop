@@ -18,7 +18,7 @@ _AddBlip = function(coords)
     SetBlipAsShortRange(blip, true)
 
     BeginTextCommandSetBlipName('STRING')
-    AddTextComponentString(_U('blip_name')) 
+    AddTextComponentString(locale('blip_name')) 
     EndTextCommandSetBlipName(blip)
 
     return blip

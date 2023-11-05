@@ -3,13 +3,15 @@ local Airdrops = {}
 local tryCount = 0
 local cooldown = Config.Cooldown * 60 * 1000
 
+lib.locale()
+
 if Config.Command.Enabled then
     lib.addCommand(Config.Command.Name, {
-        help = _U('command_help'),
+        help = locale('command_help'),
         params = {
             {
                 name = 'lootTable',
-                help = _U('command_args_lootTable'),
+                help = locale('command_args_lootTable'),
                 type = 'number',
                 optional = true
             }
@@ -19,7 +21,7 @@ if Config.Command.Enabled then
         if Config.Debug then print(args.lootTable == nil, Config.LootTables[args.lootTable] ~= nil) end
 
         if args.lootTable ~= nil and Config.LootTables[args.lootTable] == nil then
-            TriggerClientEvent('esx:showNotification', source, _U('command_error_loottable_not_found', args.lootTable))
+            TriggerClientEvent('esx:showNotification', source, locale('command_error_loottable_not_found', args.lootTable))
             return
         end
 
