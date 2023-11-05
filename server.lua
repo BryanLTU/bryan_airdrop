@@ -1,9 +1,7 @@
-ESX = nil
+ESX = exports['es_extended']:getSharedObject()
 local airdrops = {}
 local tryCount = 0
 local cooldown = math.random(Config.Airdrops.Cooldown.min, Config.Airdrops.Cooldown.max)
-
-TriggerEvent(Config.FrameworkObj, function(obj) ESX = obj end)
 
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName == GetCurrentResourceName() then
@@ -49,7 +47,8 @@ StartAirdropLoop = function()
         end
 
         RestartCooldown()
-        if Config.Airdrops.SpawnOffline or (not Config.Airdrops.SpawnOffline and #ESX.GetPlayers() > 0) then
+
+        if Config.SpawnOffline or (not Config.SpawnOffline and #GetPlayers() > 0) then
             SpawnAirdrop()
         end
 
@@ -57,27 +56,37 @@ StartAirdropLoop = function()
     end
 end
 
-if Config.Airdrops.Command.enabled then
-    ESX.RegisterCommand(Config.Airdrops.Command.name, Config.Airdrops.Command.groups, function(xPlayer, args, showError)
+if Config.Command.Enabled then
+    lib.addCommand(Config.Command.Name, {
+        help = _U('command_help'),
+        params = {
+            {
+                name = 'lootTable',
+                help = _U('command_args_lootTable'),
+                type = 'number',
+                optional = true
+            }
+        },
+        restricted = Config.Command.Groups
+    }, function(source, args, raw)
         if Config.Debug then print(args.lootTable == nil, Config.LootTables[args.lootTable] ~= nil) end
-        if args.lootTable == nil or Config.LootTables[args.lootTable] ~= nil then
-            if Config.Airdrops.Command.CommandRestart then RestartCooldown() end
 
-            if Config.Airdrops.CoordsOfCommand and (xPlayer and xPlayer.source) then
-                SpawnAirdrop(args.lootTable, GetEntityCoords(GetPlayerPed(xPlayer.source)) + vector3(0.0, 0.0, 150.0))
-            else
-                SpawnAirdrop(args.lootTable)
-            end
-
-            if xPlayer and xPlayer.source then
-                Config.NotifyExecute(xPlayer.source, xPlayer)
-            end
-        else
-            showError(_U('command_error_loottable_not_found', args.lootTable))
+        if args.lootTable ~= nil and Config.LootTables[args.lootTable] == nil then
+            TriggerClientEvent('esx:showNotification', source, _U('command_error_loottable_not_found', args.lootTable))
+            return
         end
-    end, true, {help = _U('command_help'), validate = false, arguments = {
-        { name = 'lootTable', help = _U('command_args_lootTable'), type = 'number' },
-    }})
+
+        if Config.Command.ResetCooldown then
+            RestartCooldown()
+        end
+
+        if Config.Command.ExecutorCoords and source > 0 then
+            SpawnAirdrop(args.lootTable, GetEntityCoords(GetPlayerPed(source)) + vector3(0.0, 0.0, 150.0))
+            return
+        end
+
+        SpawnAirdrop(args.lootTable)
+    end)
 end
 
 SpawnAirdrop = function(lootTable, customCoords)
@@ -96,7 +105,7 @@ SpawnAirdrop = function(lootTable, customCoords)
         if customCoords then coords = customCoords
         elseif coords.z < 150.0 then coords = vector3(randomLocation.x, randomLocation.y, 200.0) end
 
-        if Config.Airdrops.DeletePrevious then
+        if Config.RemovePreviousAirdrops then
             TriggerClientEvent('bryan_airdrops:removeAllObjects', -1)
             airdrops = {}
         end

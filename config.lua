@@ -1,28 +1,32 @@
 Config = {}
 
-Config.FrameworkObj = 'esx:getSharedObject'
-Config.PlayerLoaded = 'esx:playerLoaded'
-
 Config.Locale = 'en' --en/fr/es
 
 -- Default: false | This just prints things in console
 Config.Debug = false
 
-Config.Airdrops = {
-    Command = { -- Command which spawns Airdrop | Command can be disabled: enable = false | You can configure the name of the command and also who can execute it
-        enabled = true,
-        name = 'airdrop',
-        groups = {'admin', 'superadmin'}
-    },
-    OnlyCommand = false, -- true = only admins with commands can spawn in airdrops | false = time interval between automatic spawn (command will also be active)
-    CoordsOfCommand = true, -- Spawn Airdrop on command executor's location
-    Cooldown = { min = 5, max = 15 }, -- Minutes | Cooldown time before next airdrop spawns in | Default: { min = 5, max = 15 }
-    CommandRestart = false, -- Does Command (if enabled) restart Cooldown time of next airdrop | Default: false
-    FallSpeed = 1, -- Try modifying this to see how fast You want the Airdrop to go down | Lowering number, means slowing down airdrop fall speed | Default: 1
-    SpawnOffline = false, -- Will Airdrops spawn when there're no players online | Default: false
-    CollectTime = 10, -- Time it takes to pickup airdrop | Seconds
-    DeletePrevious = false, -- Deletes Previous Airdrop if new is spawned
-    UseFlareParticles = true,
+Config.ObjectModel = 'prop_drop_armscrate_01'   -- Model to spawn in for the falling object
+
+Config.Cooldown = 10                            -- (Minutes) How long it takes before another airdrop is spawned in
+
+Config.OnlyCommand = false                      -- When enabled airdrops can only be spawned with command
+
+Config.FallSpeed = 1                            -- How fast the airdrop falls
+
+Config.SpawnOffline = false                     -- Should airdrops spawn when there're no players online
+
+Config.RemovePreviousAirdrops = false           -- Should all previous airdrops be removed when a new airdrop is spawned
+
+Config.Blip = false                             -- Blip will be displayed in exact location of the airdrop
+
+Config.Radius = true                            -- Radius will be displayed around the area of the airdrop
+
+Config.Command = {
+    Enabled         = true,                     -- Is Command enabled
+    Name            = 'airdrop',                -- Command Name
+    Groups          = { 'group.admin' },        -- Groups that are allowed to execute the command
+    ExecutorCoords  = true,                     -- Should airdrop spawn on player's, who executed the command, coordinates 
+    ResetCooldown   = false,                    -- Should command execution restart global cooldown on airdrop spawn
 }
 
 -- Locations of where the Airdrops can spawn
@@ -34,33 +38,23 @@ Config.Locations = {
 
 -- Loot Table is chosen randomly, unless admin spawns it with specific ID. If randomly chosen Loot Table doesn't meet chance %, the script will automatically try to select other Loot Table
 Config.LootTables = {
-    [1] = {
-        Chance = 100, -- Chance that this Airdrop (If Selected) will spawn | If called by command, this Chance doesn't matter | Value in %
-        Items = { -- Item you get list | Types: 'item', 'weapon', 'account'
-            { name = 'water', count = 3, type = 'item' },
-            { name = 'bread', count = 2, type = 'item' },
-        }
-    },
-    [2] = {
-        Chance = 10,
-        Items = {
-            { name = 'WEAPON_PISTOL', count = 2, type = 'weapon' },
+    {
+        id = 1,             -- Id of the Loot Table
+        chance = 100,       -- Chance this Loot Table will be selected
+        type = 'items',     -- Type of airdrop (Supported: items, vehicle)
+        items = {           -- List of items that are received
+            { name = 'bread', count = 3, type = 'item' },
             { name = 'WEAPON_APPISTOL', count = 1, type = 'weapon' },
             { name = 'money', count = 5000, type = 'account' },
         }
     },
+    {
+        id = 2,
+        chance = 5,
+        type = 'vehicle',
+        vehicle = 'adder'   -- Vehicle model
+    }
 }
-
-Config.Object = 'prop_drop_armscrate_01'
-
-Config.Blip = {
-    Enabled = true,
-    Sprite = 306,
-    Colour = 28,
-    Scale = 0.8,
-    ShortRange = true,
-}
-
 
 -- Functions
 Config.Notification = function(msg) -- Client Side | Custom Notification if You want | By Default: ESX Notification
