@@ -12,5 +12,9 @@ shared_scripts {
     'config.lua',
     'locales/*.lua',
 }
-client_script 'client.lua'
-server_script 'server.lua'
+client_scripts {
+    'client/*.lua'
+}
+server_scripts {
+    'server/*.lua'
+}
