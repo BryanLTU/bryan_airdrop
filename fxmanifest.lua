@@ -4,7 +4,7 @@ game 'gta5'
 lua54 'yes'
 
 author 'Bryan'
-version '1.1.0'
+version '1.2.0'
 description 'Script that allows Airdrops to fall and players fight over it'
 
 shared_scripts {
