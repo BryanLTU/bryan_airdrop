@@ -1,5 +1,11 @@
 _Notification = function(msg, type)
-    ESX.ShowNotification(msg)
+    lib.notify({
+        title = locale('airdrop'),
+        description = msg,
+        type = type,
+        icon = 'plane-up',
+        iconColor = '#18B17E',
+    })
 end
 
 _AddRadius = function(coords)

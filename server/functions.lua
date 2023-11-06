@@ -12,3 +12,15 @@ _GetClosestPlayer = function(coords)
 
     return closestPlayer
 end
+
+_AddPlayerItem = function(source, item, amount)
+    ESX.GetPlayerFromId(source).addInventoryItem(item, amount)
+end
+
+_AddPlayerWeapon = function(source, weapon)
+    ESX.GetPlayerFromId(source).addWeapon(weapon, 1)
+end
+
+_AddPlayerMoney = function(source, account, amount)
+    ESX.GetPlayerFromId(source).addAccountMoney(account, amount)
+end

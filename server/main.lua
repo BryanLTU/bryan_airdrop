@@ -1,4 +1,3 @@
-ESX = exports['es_extended']:getSharedObject()
 local Airdrops = {}
 local tryCount = 0
 local cooldown = Config.Cooldown * 60 * 1000
@@ -21,7 +20,7 @@ if Config.Command.Enabled then
         if Config.Debug then print(args.lootTable == nil, Config.LootTables[args.lootTable] ~= nil) end
 
         if args.lootTable ~= nil and Config.LootTables[args.lootTable] == nil then
-            TriggerClientEvent('esx:showNotification', source, locale('command_error_loottable_not_found', args.lootTable))
+            TriggerClientEvent('bryan_airdrop:client:notification', source, locale('command_error_loottable_not_found', args.lootTable), 'error')
             return
         end
 
@@ -244,15 +243,13 @@ RemoveAirdrops = function()
 end
 
 RewardPlayer = function(source, items)
-    local xPlayer = ESX.GetPlayerFromId(source)
-
     for k, v in pairs(items) do
         if v.type == 'item' then
-            xPlayer.addInventoryItem(v.name, v.count)
+            _AddPlayerItem(source, v.name, v.count)
         elseif v.type == 'weapon' then
-            xPlayer.addWeapon(v.name, v.count)
+            _AddPlayerWeapon(source, v.name)
         elseif v.type == 'account' then
-            xPlayer.addAccountMoney(v.name, v.count)
+            _AddPlayerMoney(source, v.name, v.count)
         end
     end
 end

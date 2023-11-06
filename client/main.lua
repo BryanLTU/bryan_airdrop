@@ -1,11 +1,9 @@
-ESX = exports['es_extended']:getSharedObject()
 local airdrops = {}
 local Blips = {}
 
 Citizen.CreateThread(function()
-    while ESX.GetPlayerData().job == nil do Citizen.Wait(100) end
-
-    Citizen.CreateThread(function() ShowLocations(); end)
+    -- TODO Initalize pickup
+    -- Citizen.CreateThread(function() ShowLocations(); end)
     if Config.Debug then print(string.format('%s Started Successfully | Client Side', GetCurrentResourceName())) end
 end)
 
