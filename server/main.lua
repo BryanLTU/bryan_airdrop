@@ -62,6 +62,14 @@ RegisterNetEvent('bryan_airdrops:pickupAirdrop', function(id)
     end
 end)
 
+RegisterNetEvent('bryan_airdrops:server:airdropLanded', function(airdropId)
+    SetAirdropLanded(airdropId, true)
+end)
+
+RegisterNetEvent('bryan_airdrops:server:changeGroundCheckPlayer', function(airdropId)
+    InitializeGroundCheck(airdropId)
+end)
+
 StartAirdropLoop = function()
     while true do
         while cooldown > 0 do
@@ -125,6 +133,7 @@ SpawnAirdrop = function(lootTable, customCoords)
             type = airdropType,
             coords = coords,
             object = object,
+            landed = false,
         })
 
         if Config.Particles then
@@ -137,12 +146,15 @@ SpawnAirdrop = function(lootTable, customCoords)
 
         if Config.Debug then print('Airdrop Spawned') end
 
+        local airdropIndex = GetAirdropIndex(airdropId)
+        InitializeGroundCheck(airdropId)
+
         Citizen.CreateThread(function()
-            while DoesEntityExist(object) do -- TODO Check if above ground
+            while DoesEntityExist(object) and not Airdrops[airdropIndex].landed do -- TODO Check if above ground
                 local currentCoords = GetEntityCoords(object)
                 SetEntityCoords(object, currentCoords.x, currentCoords.y, currentCoords.z - (0.01 * Config.FallSpeed))
 
-                Citizen.Wait(1)
+                Citizen.Wait(0)
             end
 
             if Config.Debug then print(string.format('Airdrop (ID: %s) Landed', airdrops[airdropIndex].id)) end
@@ -205,6 +217,25 @@ GetRandomLootTableId = function()
     return randomLootTable.id
 end
 
+GetAirdropIndex = function(airdropId)
+    for k, v in ipairs(Airdrops) do
+        if v.id == airdropId then
+            return k
+        end
+    end
+
+    return nil
+end
+
+SetAirdropLanded = function(airdropId, value)
+    for k, v in ipairs(Airdrops) do
+        if v.id == airdropId then
+            Airdrops[k].landed = value
+            break
+        end
+    end
+end
+
 IsLocationTaken = function(location)
     for k, v in ipairs(Airdrops) do
         if v.coords == location then
@@ -262,4 +293,11 @@ GetAirdrop = function(id)
     end
 
     return nil
+end
+
+InitializeGroundCheck = function(airdropId)
+    local airdrop = GetAirdrop(airdropId)
+    local closestPlayer = _GetClosestPlayer(airdrop.coords)
+
+    TriggerClientEvent('bryan_airdrop:client:startGroundCheck', closestPlayer, airdropId, NetworkGetNetworkIdFromEntity(airdrop.object))
 end

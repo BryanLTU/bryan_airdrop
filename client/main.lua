@@ -52,6 +52,26 @@ RegisterNetEvent('bryan_airdrop:client:attachParachute', function(vehicleNetId, 
     AttachEntityToEntity(parachute, vehicle, GetEntityBoneIndexByName(vehicle, 'roof'), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, false, false, GetEntityRotation(vehicle), true)
 end)
 
+RegisterNetEvent('bryan_airdrop:client:startGroundCheck', function(airdropId, airdropNetId)
+    local object = NetworkGetEntityFromNetworkId(airdropNetId)
+
+    Citizen.CreateThread(function()
+        while true do
+            Citizen.Wait(10)
+
+            if not DoesEntityExist(object) then
+                TriggerServerEvent('bryan_airdrops:server:changeGroundCheckPlayer', airdropId)
+                break
+            end
+
+            if GetEntityHeightAboveGround(object) <= 5.0 then
+                TriggerServerEvent('bryan_airdrops:server:airdropLanded', airdropId)
+                break
+            end
+        end
+    end)
+end)
+
 RemoveBlips = function(airdropId)
     for k, v in ipairs(Blips) do
         if not airdropId or (airdropId and v.airdropId == airdropId) then
