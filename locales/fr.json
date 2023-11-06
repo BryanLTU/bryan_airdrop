@@ -5,5 +5,5 @@
     "3d_press_to_pickup": "Appuyez sur E pour ramasser l'airdrop",
     "progress_bar_picking_up": "Récupération de l'airdrop",
     "notification_airdrop_spawned": "Un airdrop a été appelé!",
-    "blip_name": "Airdrop"
+    "airdrop": "Airdrop"
 }
