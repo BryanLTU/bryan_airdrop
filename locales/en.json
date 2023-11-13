@@ -5,5 +5,6 @@
     "3d_press_to_pickup": "Press E To Pickup Airdrop",
     "progress_bar_picking_up": "Picking Up The Airdrop",
     "notification_airdrop_spawned": "Airdrop has been Called In!",
-    "airdrop": "Airdrop"
+    "airdrop": "Airdrop",
+    "collect_airdrop": "Collect Airdrop"
 }
