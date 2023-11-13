@@ -73,38 +73,29 @@ RegisterNetEvent('bryan_airdrop:client:startGroundCheck', function(airdropId, ai
     end)
 end)
 
+RegisterNetEvent('bryan_airdrop:client:prepareAirdropForClient', function(airdropId, airdropNetId)
+    exports['ox_target']:addEntity(airdropNetId, {
+        {
+            name = 'bryan_airdrop:collect',
+            label = locale('collect_airdrop'),
+            icon = 'fa-solid fa-parachute-box',
+            iconColor = '#5BC687',
+            distance = 3.0,
+            serverEvent = 'bryan_airdrops:server:collectAirdrop',
+            airdropId = airdropId
+        },
+    })
+end)
+
+RegisterNetEvent('bryan_airdrop:client:removeAirdropTarget', function(airdropNetId)
+    exports['ox_target']:removeEntity(airdropNetId, 'bryan_airdrop:collect')
+end)
+
 RemoveBlips = function(airdropId)
     for k, v in ipairs(Blips) do
         if not airdropId or (airdropId and v.airdropId == airdropId) then
             RemoveBlip(v.blip)
             table.remove(Blips, k)
         end
-    end
-end
-
-ShowLocations = function()
-    while true do
-        local wait = 500
-        local ped = PlayerPedId()
-        local coords = GetEntityCoords(ped)
-
-        for k, v in pairs(airdrops) do
-            if v.landed then
-                local distance = GetDistanceBetweenCoords(coords, v.coords, true)
-
-                if distance <= 3.0 then
-                    wait = 2
-                    ESX.Game.Utils.DrawText3D(v.coords, locale('3d_press_to_pickup'), 0.8, 4)
-
-                    if IsControlJustPressed(1, 51) then
-                        Config.ProgressBar(locale('progress_bar_picking_up'), Config.Airdrops.CollectTime * 1000)
-
-                        TriggerServerEvent('bryan_airdrops:pickupAirdrop', v.id)
-                    end
-                end
-            end
-        end
-
-        Citizen.Wait(wait)
     end
 end

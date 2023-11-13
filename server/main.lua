@@ -47,27 +47,26 @@ AddEventHandler('onResourceStart', function(resourceName)
     end
 end)
 
-RegisterNetEvent('bryan_airdrops:pickupAirdrop', function(id)
-    local airdrop = GetAirdrop(id)
-
-    if airdrop then
-        RewardPlayer(source, airdrop.items)
-        RemoveAirdrop(id)
-        TriggerClientEvent('bryan_airdrops:removeObject', -1, id)
-        TriggerClientEvent('bryan_airdrops:syncAirdrops', -1, airdrops)
-    else
-        if Config.Debug then
-            print('Could not find airdrop by it\'s ID')
-        end
-    end
-end)
-
 RegisterNetEvent('bryan_airdrops:server:airdropLanded', function(airdropId)
     SetAirdropLanded(airdropId, true)
 end)
 
 RegisterNetEvent('bryan_airdrops:server:changeGroundCheckPlayer', function(airdropId)
     InitializeGroundCheck(airdropId)
+end)
+
+RegisterNetEvent('bryan_airdrops:server:collectAirdrop', function(data)
+    local airdrop = GetAirdrop(data.airdropId)
+
+    if not airdrop then return end
+    if airdrop.collected then return end
+
+    SetAirdropCollected(airdrop.id, true)
+
+    TriggerClientEvent('bryan_airdrop:client:removeAirdropTarget', -1, NetworkGetNetworkIdFromEntity(airdrop.object))
+    DeleteEntity(airdrop.object)
+
+    RewardPlayer(source, airdrop.id)
 end)
 
 StartAirdropLoop = function()
@@ -134,6 +133,7 @@ SpawnAirdrop = function(lootTable, customCoords)
             coords = coords,
             object = object,
             landed = false,
+            collected = false,
         })
 
         if Config.Particles then
@@ -143,6 +143,7 @@ SpawnAirdrop = function(lootTable, customCoords)
         end
 
         TriggerClientEvent('bryan_airdrop:client:addBlips', -1, airdropId, coords)
+        TriggerClientEvent('bryan_airdrop:client:prepareAirdropForClient', -1, airdropId, NetworkGetNetworkIdFromEntity(object))
 
         if Config.Debug then print('Airdrop Spawned') end
 
@@ -236,6 +237,15 @@ SetAirdropLanded = function(airdropId, value)
     end
 end
 
+SetAirdropCollected = function(airdropId, value)
+    for k, v in ipairs(Airdrops) do
+        if v.id == airdropId then
+            Airdrops[k].collected = value
+            break
+        end
+    end
+end
+
 IsLocationTaken = function(location)
     for k, v in ipairs(Airdrops) do
         if v.coords == location then
@@ -273,15 +283,23 @@ RemoveAirdrops = function()
     Airdrops = {}
 end
 
-RewardPlayer = function(source, items)
-    for k, v in pairs(items) do
-        if v.type == 'item' then
-            _AddPlayerItem(source, v.name, v.count)
-        elseif v.type == 'weapon' then
-            _AddPlayerWeapon(source, v.name)
-        elseif v.type == 'account' then
-            _AddPlayerMoney(source, v.name, v.count)
+RewardPlayer = function(source, airdropId)
+    local airdrop = GetAirdrop(airdropId)
+    
+    if airdrop.type == 'items' then
+        local items = Config.LootTables[airdrop.lootTableId].items
+
+        for k, v in ipairs(items) do
+            if v.type == 'item' then
+                _AddPlayerItem(source, v.name, v.count)
+            elseif v.type == 'weapon' then
+                _AddPlayerWeapon(source, v.name)
+            elseif v.type == 'account' then
+                _AddPlayerMoney(source, v.name, v.count)
+            end
         end
+    elseif airdrop.type == 'vehicle' then
+        -- TODO transfer vehicle owner ship
     end
 end
 
