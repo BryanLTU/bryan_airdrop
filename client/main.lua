@@ -1,9 +1,8 @@
-local airdrops = {}
 local Blips = {}
 
+lib.locale()
+
 Citizen.CreateThread(function()
-    -- TODO Initalize pickup
-    -- Citizen.CreateThread(function() ShowLocations(); end)
     if Config.Debug then print(string.format('%s Started Successfully | Client Side', GetCurrentResourceName())) end
 end)
 
