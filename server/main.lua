@@ -286,7 +286,7 @@ RewardPlayer = function(source, items)
 end
 
 GetAirdrop = function(id)
-    for k, v in pairs(airdrops) do
+    for k, v in pairs(Airdrops) do
         if v.id == id then
             return v
         end
