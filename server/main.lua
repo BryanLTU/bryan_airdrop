@@ -151,7 +151,7 @@ SpawnAirdrop = function(lootTable, customCoords)
         InitializeGroundCheck(airdropId)
 
         Citizen.CreateThread(function()
-            while DoesEntityExist(object) and not Airdrops[airdropIndex].landed do -- TODO Check if above ground
+            while DoesEntityExist(object) and not Airdrops[airdropIndex].landed do
                 local currentCoords = GetEntityCoords(object)
                 SetEntityCoords(object, currentCoords.x, currentCoords.y, currentCoords.z - (0.01 * Config.FallSpeed))
 
@@ -159,7 +159,6 @@ SpawnAirdrop = function(lootTable, customCoords)
             end
 
             if Config.Debug then print(string.format('Airdrop (ID: %s) Landed', airdrops[airdropIndex].id)) end
-            -- TODO Event for landed airdrop
         end)
     elseif isLocationTaken then 
         tryCount = tryCount + 1
