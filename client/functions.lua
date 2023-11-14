@@ -33,3 +33,11 @@ end
 _LootAirdrop = function()
 
 end
+
+_GeneratePlate = function()
+    if Config.Framework == 'esx' then
+        return exports['esx_vehicleshop']:GeneratePlate()
+    elseif Config.Framework == 'qbcore' then
+        -- TODO QB compatibility
+    end
+end

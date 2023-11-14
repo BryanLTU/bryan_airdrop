@@ -2,6 +2,8 @@ Config = {}
 
 Config.Locale = 'en' --en/fr/es
 
+Config.Framework = 'esx' -- esx/qbcore
+
 Config.Debug = false
 
 Config.ObjectModel = 'prop_drop_armscrate_01'   -- Model to spawn in for the falling object

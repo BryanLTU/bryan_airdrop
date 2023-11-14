@@ -112,14 +112,17 @@ SpawnAirdrop = function(lootTable, customCoords)
         elseif airdropType == 'vehicle' then
             object = CreateVehicle(GetHashKey(GetAirdropVehicle(lootTableId)), coords.x, coords.y, coords.z, 0.0, true, false)
         end
-
+        
         if object == nil then return end
         
         while not DoesEntityExist(object) do Wait(0) end
-
+        
         if airdropType == 'vehicle' then
             local parachute = CreateObject(GetHashKey('p_parachute1_mp_dec'), coords.x, coords.y, coords.z, true, false, false)
             while not DoesEntityExist(parachute) do Wait(0) end
+            
+            local plate = lib.callback.await('bryan_airdrop:client:getPlate', closestPlayer)
+            SetVehicleNumberPlateText(object, plate)
 
             TriggerClientEvent('bryan_airdrop:client:attachParachute', closestPlayer, NetworkGetNetworkIdFromEntity(object), NetworkGetNetworkIdFromEntity(parachute))
         end

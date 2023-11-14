@@ -90,6 +90,10 @@ RegisterNetEvent('bryan_airdrop:client:removeAirdropTarget', function(airdropNet
     exports['ox_target']:removeEntity(airdropNetId, 'bryan_airdrop:collect')
 end)
 
+lib.callback.register('bryan_airdrop:client:getPlate', function()
+    return _GeneratePlate()
+end)
+
 RemoveBlips = function(airdropId)
     for k, v in ipairs(Blips) do
         if not airdropId or (airdropId and v.airdropId == airdropId) then
