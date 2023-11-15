@@ -24,3 +24,15 @@ end
 _AddPlayerMoney = function(source, account, amount)
     ESX.GetPlayerFromId(source).addAccountMoney(account, amount)
 end
+
+_AddPlayerVehicle = function(source, model, plate)
+    if Config.Framework == 'esx' then
+        MySQL.insert('INSERT INTO owned_vehicles (owner, plate, vehicle) VALUES (?, ?, ?', {
+            ESX.GetPlayerFromId(source).getIdentifier(),
+            plate,
+            json.encode({ model = joaat(model), plate = plate })
+        })
+    elseif Config.Framework == 'qbcore' then
+        
+    end
+end

@@ -64,9 +64,12 @@ RegisterNetEvent('bryan_airdrops:server:collectAirdrop', function(data)
     SetAirdropCollected(airdrop.id, true)
 
     TriggerClientEvent('bryan_airdrop:client:removeAirdropTarget', -1, NetworkGetNetworkIdFromEntity(airdrop.object))
-    DeleteEntity(airdrop.object)
-
-    RewardPlayer(source, airdrop.id)
+    
+    if airdrop.type ~= 'vehicle' then
+        DeleteEntity(airdrop.object)
+    end
+    
+    RewardPlayer(source, airdrop.id, { plate = airdrop.type == vehicle and GetVehicleNumberPlateText(airdrop.object) }})
 end)
 
 StartAirdropLoop = function()
@@ -285,7 +288,7 @@ RemoveAirdrops = function()
     Airdrops = {}
 end
 
-RewardPlayer = function(source, airdropId)
+RewardPlayer = function(source, airdropId, data)
     local airdrop = GetAirdrop(airdropId)
     
     if airdrop.type == 'items' then
@@ -301,7 +304,7 @@ RewardPlayer = function(source, airdropId)
             end
         end
     elseif airdrop.type == 'vehicle' then
-        -- TODO transfer vehicle owner ship
+        _AddPlayerVehicle(source, airdrop.vehicle, data.plate)
     end
 end
 
