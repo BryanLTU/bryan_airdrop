@@ -88,6 +88,7 @@ end)
 
 RegisterNetEvent('bryan_airdrop:client:removeAirdropTarget', function(airdropNetId)
     exports['ox_target']:removeEntity(airdropNetId, 'bryan_airdrop:collect')
+    RemoveParticleFxFromEntity(NetworkGetEntityFromNetworkId(airdropNetId))
 end)
 
 lib.callback.register('bryan_airdrop:client:getPlate', function()
