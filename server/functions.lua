@@ -27,7 +27,7 @@ end
 
 _AddPlayerVehicle = function(source, model, plate)
     if Config.Framework == 'esx' then
-        MySQL.insert('INSERT INTO owned_vehicles (owner, plate, vehicle) VALUES (?, ?, ?', {
+        MySQL.insert('INSERT INTO owned_vehicles (owner, plate, vehicle) VALUES (?, ?, ?)', {
             ESX.GetPlayerFromId(source).getIdentifier(),
             plate,
             json.encode({ model = joaat(model), plate = plate })
