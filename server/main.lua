@@ -72,6 +72,8 @@ RegisterNetEvent('bryan_airdrops:server:collectAirdrop', function(data)
     end
     
     RewardPlayer(source, airdrop.id, { plate = airdrop.type == vehicle and GetVehicleNumberPlateText(airdrop.object) })
+
+    RemoveAirdrop(airdrop.id)
 end)
 
 StartAirdropLoop = function()
@@ -276,7 +278,6 @@ end
 RemoveAirdrop = function(airdropId)
     for k, v in ipairs(Airdrops) do
         if v.id == airdropId then
-            DeleteEntity(v.object)
             TriggerClientEvent('bryan_airdrop:client:removeBlipsWithAirdropId', -1, v.id)
 
             table.remove(Airdrops, k)
