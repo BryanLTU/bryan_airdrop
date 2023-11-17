@@ -312,7 +312,7 @@ RewardPlayer = function(source, airdropId, data)
             end
         end
     elseif airdrop.type == 'vehicle' then
-        _AddPlayerVehicle(source, airdrop.vehicle, data.plate)
+        _AddPlayerVehicle(source, Config.LootTables[airdrop.lootTableId].vehicle, data.plate)
     end
 end
 
