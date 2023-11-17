@@ -121,16 +121,6 @@ SpawnAirdrop = function(lootTable, customCoords)
         if object == nil then return end
         
         while not DoesEntityExist(object) do Wait(0) end
-        
-        if airdropType == 'vehicle' then
-            local parachute = CreateObject(GetHashKey('p_parachute1_mp_dec'), coords.x, coords.y, coords.z, true, false, false)
-            while not DoesEntityExist(parachute) do Wait(0) end
-            
-            local plate = lib.callback.await('bryan_airdrop:client:getPlate', closestPlayer)
-            SetVehicleNumberPlateText(object, plate)
-
-            TriggerClientEvent('bryan_airdrop:client:attachParachute', closestPlayer, NetworkGetNetworkIdFromEntity(object), NetworkGetNetworkIdFromEntity(parachute))
-        end
 
         FreezeEntityPosition(object, true)
 
@@ -144,6 +134,22 @@ SpawnAirdrop = function(lootTable, customCoords)
             collected = false,
         })
 
+        local airdropIndex = GetAirdropIndex(airdropId)
+        
+        if airdropType == 'vehicle' then
+            local parachute = CreateObject(GetHashKey('p_parachute1_mp_dec'), coords.x, coords.y, coords.z + 10.0, true, false, false)
+            while not DoesEntityExist(parachute) do Wait(0) end
+
+            FreezeEntityPosition(parachute, true)
+            
+            local plate = lib.callback.await('bryan_airdrop:client:getPlate', closestPlayer)
+            SetVehicleNumberPlateText(object, plate)
+
+            TriggerClientEvent('bryan_airdrop:client:attachParachute', closestPlayer, NetworkGetNetworkIdFromEntity(object), NetworkGetNetworkIdFromEntity(parachute))
+        
+            Airdrops[airdropIndex].parachute = parachute
+        end
+
         if Config.Particles then
             if closestPlayer then
                 TriggerClientEvent('bryan_airdrop:client:startParticles', closestPlayer, NetworkGetNetworkIdFromEntity(object))
@@ -155,13 +161,13 @@ SpawnAirdrop = function(lootTable, customCoords)
 
         if Config.Debug then print('Airdrop Spawned') end
 
-        local airdropIndex = GetAirdropIndex(airdropId)
         InitializeGroundCheck(airdropId)
-
+        
         Citizen.CreateThread(function()
             while DoesEntityExist(object) and not Airdrops[airdropIndex].landed do
-                local currentCoords = GetEntityCoords(object)
-                SetEntityCoords(object, currentCoords.x, currentCoords.y, currentCoords.z - (0.01 * Config.FallSpeed))
+                Airdrops[airdropIndex].coords = Airdrops[airdropIndex].coords - vector3(0.0, 0.0, 0.01 * Config.FallSpeed)
+
+                SetEntityCoords(object, Airdrops[airdropIndex].coords.x, Airdrops[airdropIndex].coords.y, Airdrops[airdropIndex].coords.z)
 
                 Citizen.Wait(0)
             end

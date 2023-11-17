@@ -48,7 +48,7 @@ end)
 RegisterNetEvent('bryan_airdrop:client:attachParachute', function(vehicleNetId, parachuteNetId)
     local vehicle, parachute = NetworkGetEntityFromNetworkId(vehicleNetId), NetworkGetEntityFromNetworkId(parachuteNetId)
 
-    AttachEntityToEntity(parachute, vehicle, GetEntityBoneIndexByName(vehicle, 'roof'), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, false, false, false, GetEntityRotation(vehicle), true)
+    AttachEntityToEntity(parachute, vehicle, GetEntityBoneIndexByName(vehicle, 'roof'), 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0, false, false, false, GetEntityRotation(vehicle), true)
 end)
 
 RegisterNetEvent('bryan_airdrop:client:startGroundCheck', function(airdropId, airdropNetId)
