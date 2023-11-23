@@ -71,7 +71,7 @@ RegisterNetEvent('bryan_airdrops:server:collectAirdrop', function(data)
         DeleteEntity(airdrop.object)
     end
     
-    RewardPlayer(source, airdrop.id, { plate = airdrop.type == vehicle and GetVehicleNumberPlateText(airdrop.object) })
+    RewardPlayer(source, airdrop.id, { plate = airdrop.type == 'vehicle' and GetVehicleNumberPlateText(airdrop.object) })
 
     RemoveAirdrop(airdrop.id)
 end)
