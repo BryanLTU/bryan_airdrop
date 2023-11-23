@@ -6,5 +6,8 @@
     "progress_bar_picking_up": "Picking Up The Airdrop",
     "notification_airdrop_spawned": "Airdrop has been Called In!",
     "airdrop": "Airdrop",
-    "collect_airdrop": "Collect Airdrop"
+    "collect_airdrop": "Collect Airdrop",
+    "airdrop_collected": "You've collected the Airdrop",
+    "airdrop_already_collected": "Airdrop is already collected",
+    "vehicle_airdrop_collected": "You've received Vehicle with plate %s"
 }

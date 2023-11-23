@@ -59,7 +59,10 @@ RegisterNetEvent('bryan_airdrops:server:collectAirdrop', function(data)
     local airdrop = GetAirdrop(data.airdropId)
 
     if not airdrop then return end
-    if airdrop.collected then return end
+    if airdrop.collected then
+        TriggerClientEvent('bryan_airdrop:client:notification', source, locale('airdrop_already_collected'), 'error')
+        return
+    end
 
     SetAirdropCollected(airdrop.id, true)
 
@@ -312,8 +315,11 @@ RewardPlayer = function(source, airdropId, data)
                 _AddPlayerMoney(source, v.name, v.count)
             end
         end
+        
+        TriggerClientEvent('bryan_airdrop:client:notification', source, locale('airdrop_collected'), 'success')
     elseif airdrop.type == 'vehicle' then
         _AddPlayerVehicle(source, Config.LootTables[airdrop.lootTableId].vehicle, data.plate)
+        TriggerClientEvent('bryan_airdrop:client:notification', source, locale('vehicle_airdrop_collected', data.plate), 'success')
     end
 end
 
