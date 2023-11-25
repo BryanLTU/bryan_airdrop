@@ -89,7 +89,7 @@ RegisterNetEvent('bryan_airdrop:client:startParticles', function(airdropNetId)
 
     UseParticleFxAssetNextCall("core")
     SetParticleFxNonLoopedColour(1.0, 0.0, 0.0)
-    StartNetworkedParticleFxLoopedOnEntity('weap_heist_flare_trail', object, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+    StartNetworkedParticleFxLoopedOnEntity('proj_flare_trail', object, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
 end)
 
 RegisterNetEvent('bryan_airdrop:client:attachParachute', function(vehicleNetId, parachuteNetId)
