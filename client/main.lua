@@ -113,6 +113,10 @@ RegisterNetEvent('bryan_airdrop:client:startGroundCheck', function(airdropId, ai
             if GetEntityHeightAboveGround(object) <= 2.0 then
                 PlaceObjectOnGroundProperly(object)
                 TriggerServerEvent('bryan_airdrops:server:airdropLanded', airdropId)
+
+                Citizen.Wait(1000)
+                FreezeEntityPosition(object, false)
+
                 break
             end
         end
