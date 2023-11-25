@@ -72,7 +72,7 @@ RegisterNetEvent('bryan_airdrops:server:collectAirdrop', function(data)
 
     SetAirdropCollected(airdrop.id, true)
 
-    TriggerClientEvent('bryan_airdrop:client:removeAirdropTarget', -1, NetworkGetNetworkIdFromEntity(airdrop.object))
+    TriggerClientEvent('bryan_airdrop:client:removeClientCollect', -1, Config.CollectionType == 'target' and NetworkGetNetworkIdFromEntity(airdrop.object) or airdrop.id)
     
     if airdrop.type == 'vehicle' then
         DeleteEntity(airdrop.parachute)
@@ -168,7 +168,6 @@ SpawnAirdrop = function(lootTable, customCoords)
         end
 
         TriggerClientEvent('bryan_airdrop:client:addBlips', -1, airdropId, coords)
-        TriggerClientEvent('bryan_airdrop:client:prepareAirdropForClient', -1, airdropId, NetworkGetNetworkIdFromEntity(object))
 
         if Config.Debug then print('Airdrop Spawned') end
 
@@ -186,6 +185,8 @@ SpawnAirdrop = function(lootTable, customCoords)
             end
 
             if Config.Debug then print(string.format('Airdrop (ID: %s) Landed', airdrops[airdropIndex].id)) end
+
+            TriggerClientEvent('bryan_airdrop:client:initializeClientCollect', -1, airdropId, NetworkGetNetworkIdFromEntity(object))
         end)
     elseif isLocationTaken then 
         tryCount = tryCount + 1

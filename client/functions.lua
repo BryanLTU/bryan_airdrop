@@ -1,3 +1,11 @@
+FrameworkObj = nil
+
+if Config.Framework == 'esx' then
+    FrameworkObj = exports['es_extended']:getSharedObject()
+elseif Config.Framework == 'qbcore' then
+    FrameworkObj = exports['qb-core']:GetCoreObject()
+end
+
 _Notification = function(msg, type)
     lib.notify({
         title = locale('airdrop'),
@@ -6,6 +14,24 @@ _Notification = function(msg, type)
         icon = 'plane-up',
         iconColor = '#18B17E',
     })
+end
+
+_TextUI = function(value, msg)
+    if value then
+        lib.showTextUI(msg, {
+            icon = 'parachute-box',
+        })
+    else
+        lib.hideTextUI()
+    end
+end
+
+_Text3D = function(coords, msg)
+    if Config.Framework == 'esx' then
+        FrameworkObj.Game.Utils.DrawText3D(coords, msg, 0.8, 4)
+    elseif Config.Framework == 'qbcore' then
+        FrameworkObj.Functions.DrawText3D(coords.x, coords.y, coords.z, msg)
+    end
 end
 
 _AddRadius = function(coords)
@@ -30,8 +56,22 @@ _AddBlip = function(coords)
     return blip
 end
 
-_LootAirdrop = function()
+_AddTarget = function(id, netId)
+    exports['ox_target']:addEntity(netId, {
+        {
+            name = 'bryan_airdrop:collect',
+            label = locale('collect_airdrop'),
+            icon = 'fa-solid fa-parachute-box',
+            iconColor = '#5BC687',
+            distance = 3.0,
+            serverEvent = 'bryan_airdrops:server:collectAirdrop',
+            airdropId = id
+        },
+    })
+end
 
+_RemoveTarget = function(netId)
+    exports['ox_target']:removeEntity(netId, 'bryan_airdrop:collect')
 end
 
 _GeneratePlate = function()

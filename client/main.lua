@@ -1,9 +1,56 @@
-local Blips = {}
+local Blips, Airdrops = {}, {}
 
 lib.locale()
 
 Citizen.CreateThread(function()
     if Config.Debug then print(string.format('%s Started Successfully | Client Side', GetCurrentResourceName())) end
+
+    local isDisplayingText = false
+
+    while true do
+        local sleep = true
+
+        if #Airdrops > 0 then
+            local myCoords = GetEntityCoords(PlayerPedId())
+
+            for k, v in ipairs(Airdrops) do
+                if DoesEntityExist(v.object) then
+                    local airdropCoords = GetEntityCoords(v.object)
+                    local isInRadius = #(myCoords - airdropCoords) <= 4.0
+
+                    if isInRadius then
+                        sleep = false
+
+                        if Config.CollectionType == 'textui' and not isDisplayingText then
+                            isDisplayingText = true
+                            _TextUI(true, locale('press_to_pickup'))
+                        elseif Config.CollectionType == '3dtext' then
+                            _Text3D(airdropCoords, locale('press_to_pickup'))
+                        end
+
+                        if IsControlJustPressed(1, 51) then
+                            TriggerServerEvent('bryan_airdrops:server:collectAirdrop', { airdropId = v.airdropId })
+                            Citizen.Wait(1000)
+
+                            if Config.CollectionType == 'textui' then
+                                isDisplayingText = false
+                                _TextUI(false)
+                            end
+                        end
+                    elseif Config.CollectionType == 'textui' and isDisplayingText then
+                        isDisplayingText = false
+                        _TextUI(false)
+                    end
+                elseif Config.CollectionType == 'textui' then
+                    isDisplayingText = false
+                    _TextUI(false)
+                end
+            end
+        end
+
+        if sleep then Citizen.Wait(500) end
+        Citizen.Wait(0)
+    end
 end)
 
 RegisterNetEvent('bryan_airdrop:client:addBlips', function(airdropId, coords)
@@ -65,7 +112,6 @@ RegisterNetEvent('bryan_airdrop:client:startGroundCheck', function(airdropId, ai
 
             if GetEntityHeightAboveGround(object) <= 2.0 then
                 PlaceObjectOnGroundProperly(object)
-                FreezeEntityPosition(object, false)
                 TriggerServerEvent('bryan_airdrops:server:airdropLanded', airdropId)
                 break
             end
@@ -73,23 +119,32 @@ RegisterNetEvent('bryan_airdrop:client:startGroundCheck', function(airdropId, ai
     end)
 end)
 
-RegisterNetEvent('bryan_airdrop:client:prepareAirdropForClient', function(airdropId, airdropNetId)
-    exports['ox_target']:addEntity(airdropNetId, {
-        {
-            name = 'bryan_airdrop:collect',
-            label = locale('collect_airdrop'),
-            icon = 'fa-solid fa-parachute-box',
-            iconColor = '#5BC687',
-            distance = 3.0,
-            serverEvent = 'bryan_airdrops:server:collectAirdrop',
-            airdropId = airdropId
-        },
-    })
+RegisterNetEvent('bryan_airdrop:client:removeParticles', function(airdropNetId)
+    RemoveParticleFxFromEntity(NetworkGetEntityFromNetworkId(airdropNetId))
 end)
 
-RegisterNetEvent('bryan_airdrop:client:removeAirdropTarget', function(airdropNetId)
-    exports['ox_target']:removeEntity(airdropNetId, 'bryan_airdrop:collect')
-    RemoveParticleFxFromEntity(NetworkGetEntityFromNetworkId(airdropNetId))
+RegisterNetEvent('bryan_airdrop:client:initializeClientCollect', function(airdropId, airdropNetId)
+    if Config.CollectionType == 'target' then
+        _AddTarget(airdropId, airdropNetId)
+    else
+        table.insert(Airdrops, {
+            airdropId = airdropId,
+            object = NetworkGetEntityFromNetworkId(airdropNetId)
+        })
+    end
+end)
+
+RegisterNetEvent('bryan_airdrop:client:removeClientCollect', function(id)
+    if Config.CollectionType == 'target' then
+        _RemoveTarget(airdropNetId)
+    else
+        for k, v in ipairs(Airdrops) do
+            if v.airdropId == id then
+                table.remove(Airdrops, k)
+                break
+            end
+        end
+    end
 end)
 
 lib.callback.register('bryan_airdrop:client:getPlate', function()

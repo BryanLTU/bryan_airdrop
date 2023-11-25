@@ -1,8 +1,10 @@
 Config = {}
 
-Config.Locale = 'en' --en/fr/es
+Config.Locale = 'en'                            --en / fr / es
 
-Config.Framework = 'esx' -- esx/qbcore
+Config.Framework = 'esx'                        -- esx / qbcore
+
+Config.CollectionType = 'textui'                -- target / textui / 3dtext
 
 Config.Debug = false
 
