@@ -47,6 +47,12 @@ AddEventHandler('onResourceStart', function(resourceName)
     end
 end)
 
+AddEventHandler('onResourceStop', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        RemoveAirdrops()
+    end
+end)
+
 RegisterNetEvent('bryan_airdrops:server:airdropLanded', function(airdropId)
     SetAirdropLanded(airdropId, true)
 end)
