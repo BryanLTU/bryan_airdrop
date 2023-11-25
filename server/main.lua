@@ -176,11 +176,11 @@ SpawnAirdrop = function(lootTable, customCoords)
         
         Citizen.CreateThread(function()
             while DoesEntityExist(object) and not Airdrops[airdropIndex].landed do
-                Airdrops[airdropIndex].coords = Airdrops[airdropIndex].coords - vector3(0.0, 0.0, 0.01 * Config.FallSpeed)
+                Airdrops[airdropIndex].coords = Airdrops[airdropIndex].coords - vector3(0.0, 0.0, 0.01)
 
                 SetEntityCoords(object, Airdrops[airdropIndex].coords.x, Airdrops[airdropIndex].coords.y, Airdrops[airdropIndex].coords.z)
 
-                Citizen.Wait(0)
+                Citizen.Wait(1 * (100 / Config.FallSpeed))
             end
 
             if Config.Debug then print(string.format('Airdrop (ID: %s) Landed', airdrops[airdropIndex].id)) end

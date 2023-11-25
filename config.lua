@@ -12,7 +12,7 @@ Config.Cooldown = 10                            -- (Minutes) How long it takes b
 
 Config.OnlyCommand = false                      -- When enabled airdrops can only be spawned with command
 
-Config.FallSpeed = 1                            -- How fast the airdrop falls
+Config.FallSpeed = 100                          -- (Percentage) How fast the airdrop falls (max: 100)
 
 Config.SpawnOffline = false                     -- Should airdrops spawn when there're no players online
 
