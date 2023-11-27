@@ -87,6 +87,7 @@ RegisterNetEvent('bryan_airdrop:client:startParticles', function(airdropNetId)
     RequestNamedPtfxAsset('core')
     while not HasNamedPtfxAssetLoaded('core') do Citizen.Wait(10) end
 
+    -- TODO Try new particle scr_oddjobtraffickingair - scr_crate_drop_flare
     UseParticleFxAssetNextCall("core")
     SetParticleFxNonLoopedColour(1.0, 0.0, 0.0)
     StartNetworkedParticleFxLoopedOnEntity('proj_flare_trail', object, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
@@ -116,6 +117,7 @@ RegisterNetEvent('bryan_airdrop:client:startGroundCheck', function(airdropId, ai
 
                 Citizen.Wait(1000)
                 FreezeEntityPosition(object, false)
+                -- TODO Apply force so the airdrop touches ground (ApplyForceToEntity)
 
                 break
             end
