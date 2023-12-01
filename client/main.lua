@@ -84,13 +84,12 @@ end)
 RegisterNetEvent('bryan_airdrop:client:startParticles', function(airdropNetId)
     local object = NetworkGetEntityFromNetworkId(airdropNetId)
 
-    RequestNamedPtfxAsset('core')
-    while not HasNamedPtfxAssetLoaded('core') do Citizen.Wait(10) end
+    RequestNamedPtfxAsset('scr_oddjobtraffickingair')
+    while not HasNamedPtfxAssetLoaded('scr_oddjobtraffickingair') do Citizen.Wait(10) end
 
-    -- TODO Try new particle scr_oddjobtraffickingair - scr_crate_drop_flare
-    UseParticleFxAssetNextCall("core")
-    SetParticleFxNonLoopedColour(1.0, 0.0, 0.0)
-    StartNetworkedParticleFxLoopedOnEntity('proj_flare_trail', object, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+    UseParticleFxAssetNextCall("scr_oddjobtraffickingair")
+    local ptfx = StartNetworkedParticleFxLoopedOnEntity('scr_crate_drop_flare', object, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)
+    SetParticleFxLoopedColour(ptfx, 1.0, 0.0, 0.0, 0)
 end)
 
 RegisterNetEvent('bryan_airdrop:client:attachParachute', function(vehicleNetId, parachuteNetId)
