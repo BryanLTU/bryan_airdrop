@@ -4,7 +4,7 @@ Config.Locale = 'en'                            --en / fr / es
 
 Config.Framework = 'esx'                        -- esx / qbcore
 
-Config.CollectionType = 'textui'                -- target / textui / 3dtext
+Config.CollectionType = 'target'                -- target / textui / 3dtext
 
 Config.Debug = false
 

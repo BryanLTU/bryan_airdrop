@@ -72,7 +72,7 @@ RegisterNetEvent('bryan_airdrops:server:collectAirdrop', function(data)
 
     SetAirdropCollected(airdrop.id, true)
 
-    TriggerClientEvent('bryan_airdrop:client:removeClientCollect', -1, Config.CollectionType == 'target' and NetworkGetNetworkIdFromEntity(airdrop.object) or airdrop.id)
+    TriggerClientEvent('bryan_airdrop:client:removeClientCollect', -1, airdrop.id, NetworkGetNetworkIdFromEntity(airdrop.object))
     
     if airdrop.type == 'vehicle' then
         DeleteEntity(airdrop.parachute)

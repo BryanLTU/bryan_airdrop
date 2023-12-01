@@ -1,9 +1,11 @@
-local Blips, Airdrops = {}, {}
+local Blips, Airdrops, AirdropTargets = {}, {}, {}
 
 lib.locale()
 
 Citizen.CreateThread(function()
     if Config.Debug then print(string.format('%s Started Successfully | Client Side', GetCurrentResourceName())) end
+
+    if Config.CollectionType == 'target' then return end
 
     local isDisplayingText = false
 
@@ -14,36 +16,40 @@ Citizen.CreateThread(function()
             local myCoords = GetEntityCoords(PlayerPedId())
 
             for k, v in ipairs(Airdrops) do
-                if DoesEntityExist(v.object) then
-                    local airdropCoords = GetEntityCoords(v.object)
-                    local isInRadius = #(myCoords - airdropCoords) <= 4.0
+                if NetworkDoesNetworkIdExist(v.airdropNetId) then
+                    local object = NetworkGetEntityFromNetworkId(v.airdropNetId)
 
-                    if isInRadius then
-                        sleep = false
+                    if DoesEntityExist(object) then
+                        local airdropCoords = GetEntityCoords(object)
+                        local isInRadius = #(myCoords - airdropCoords) <= 4.0
 
-                        if Config.CollectionType == 'textui' and not isDisplayingText then
-                            isDisplayingText = true
-                            _TextUI(true, locale('press_to_pickup'))
-                        elseif Config.CollectionType == '3dtext' then
-                            _Text3D(airdropCoords, locale('press_to_pickup'))
-                        end
+                        if isInRadius then
+                            sleep = false
 
-                        if IsControlJustPressed(1, 51) then
-                            TriggerServerEvent('bryan_airdrops:server:collectAirdrop', { airdropId = v.airdropId })
-                            Citizen.Wait(1000)
-
-                            if Config.CollectionType == 'textui' then
-                                isDisplayingText = false
-                                _TextUI(false)
+                            if Config.CollectionType == 'textui' and not isDisplayingText then
+                                isDisplayingText = true
+                                _TextUI(true, locale('press_to_pickup'))
+                            elseif Config.CollectionType == '3dtext' then
+                                _Text3D(airdropCoords, locale('press_to_pickup'))
                             end
+
+                            if IsControlJustPressed(1, 51) then
+                                TriggerServerEvent('bryan_airdrops:server:collectAirdrop', { airdropId = v.airdropId })
+                                Citizen.Wait(1000)
+
+                                if Config.CollectionType == 'textui' then
+                                    isDisplayingText = false
+                                    _TextUI(false)
+                                end
+                            end
+                        elseif Config.CollectionType == 'textui' and isDisplayingText then
+                            isDisplayingText = false
+                            _TextUI(false)
                         end
-                    elseif Config.CollectionType == 'textui' and isDisplayingText then
+                    elseif Config.CollectionType == 'textui' then
                         isDisplayingText = false
                         _TextUI(false)
                     end
-                elseif Config.CollectionType == 'textui' then
-                    isDisplayingText = false
-                    _TextUI(false)
                 end
             end
         end
@@ -130,21 +136,24 @@ end)
 
 RegisterNetEvent('bryan_airdrop:client:initializeClientCollect', function(airdropId, airdropNetId)
     if Config.CollectionType == 'target' then
-        _AddTarget(airdropId, airdropNetId)
+        AddTargetWhenNetIdExists(airdropId, airdropNetId)
     else
         table.insert(Airdrops, {
             airdropId = airdropId,
-            object = NetworkGetEntityFromNetworkId(airdropNetId)
+            airdropNetId = airdropNetId
         })
     end
 end)
 
-RegisterNetEvent('bryan_airdrop:client:removeClientCollect', function(id)
+RegisterNetEvent('bryan_airdrop:client:removeClientCollect', function(airdropId, airdropNetId)
     if Config.CollectionType == 'target' then
-        _RemoveTarget(airdropNetId)
+        if AirdropTargets[airdropId] then
+            _RemoveTarget(airdropNetId)
+            AirdropTargets[airdropId] = false
+        end
     else
         for k, v in ipairs(Airdrops) do
-            if v.airdropId == id then
+            if v.airdropId == airdropId then
                 table.remove(Airdrops, k)
                 break
             end
@@ -163,4 +172,18 @@ RemoveBlips = function(airdropId)
             table.remove(Blips, k)
         end
     end
+end
+
+AddTargetWhenNetIdExists = function(airdropId, airdropNetId)
+    AirdropTargets[airdropId] = true
+
+    Citizen.CreateThread(function()
+        while not NetworkDoesNetworkIdExist(airdropNetId) and AirdropTargets[airdropId] do
+            Citizen.Wait(1000)
+        end
+
+        if AirdropTargets[airdropId] then
+            _AddTarget(airdropId, airdropNetId)
+        end
+    end)
 end
