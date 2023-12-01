@@ -22,7 +22,7 @@ Config.RemovePreviousAirdrops = false           -- Should all previous airdrops 
 
 Config.Blip = false                             -- Blip will be displayed in exact location of the airdrop
 
-Config.Radius = 20.0                            -- (Radius | false) Radius Blip will be displayed around the area of the airdrop
+Config.Radius = 200.0                           -- (Radius | false) Radius Blip will be displayed around the area of the airdrop
 
 Config.Particles = true                         -- Particles that will be played while the airdrop is falling
 

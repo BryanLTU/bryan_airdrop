@@ -36,6 +36,12 @@ end
 
 _AddRadius = function(coords)
     local blip = AddBlipForRadius(coords.x, coords.y, coords.z, Config.Radius)
+    SetBlipColour(blip, 1)
+    SetBlipAlpha(blip, 150)
+
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentString(locale('airdrop')) 
+    EndTextCommandSetBlipName(blip)
 
     return blip
 end
