@@ -116,7 +116,7 @@ RegisterNetEvent('bryan_airdrop:client:startGroundCheck', function(airdropId, ai
 
                 Citizen.Wait(1000)
                 FreezeEntityPosition(object, false)
-                -- TODO Apply force so the airdrop touches ground (ApplyForceToEntity)
+                ApplyForceToEntityCenterOfMass(object, 0, 0.0, 0.0, -1.0, 0, 0, 0, 0)
 
                 break
             end
