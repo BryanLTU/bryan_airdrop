@@ -1,4 +1,5 @@
 local Blips, Airdrops, AirdropTargets = {}, {}, {}
+local isDisplayingText = false
 
 lib.locale()
 
@@ -6,8 +7,6 @@ Citizen.CreateThread(function()
     if Config.Debug then print(string.format('%s Started Successfully | Client Side', GetCurrentResourceName())) end
 
     if Config.CollectionType == 'target' then return end
-
-    local isDisplayingText = false
 
     while true do
         local sleep = true
@@ -46,9 +45,6 @@ Citizen.CreateThread(function()
                             isDisplayingText = false
                             _TextUI(false)
                         end
-                    elseif Config.CollectionType == 'textui' then
-                        isDisplayingText = false
-                        _TextUI(false)
                     end
                 end
             end
@@ -152,6 +148,11 @@ RegisterNetEvent('bryan_airdrop:client:removeClientCollect', function(airdropId,
             AirdropTargets[airdropId] = false
         end
     else
+        if isDisplayingText then
+            isDisplayingText = false
+            _TextUI(false)
+        end
+
         for k, v in ipairs(Airdrops) do
             if v.airdropId == airdropId then
                 table.remove(Airdrops, k)
