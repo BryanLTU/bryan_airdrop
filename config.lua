@@ -26,6 +26,8 @@ Config.Radius = 200.0                           -- (Radius | false) Radius Blip 
 
 Config.Particles = true                         -- Particles that will be played while the airdrop is falling
 
+Config.ProgressBar = true                       -- Enable progress bar when collecting the airdrop
+
 Config.Command = {
     Enabled         = true,                     -- Is Command enabled
     Name            = 'airdrop',                -- Command Name

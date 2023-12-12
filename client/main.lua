@@ -33,12 +33,9 @@ Citizen.CreateThread(function()
                             end
 
                             if IsControlJustPressed(1, 51) then
-                                TriggerServerEvent('bryan_airdrops:server:collectAirdrop', { airdropId = v.airdropId })
-                                Citizen.Wait(1000)
-
-                                if Config.CollectionType == 'textui' then
-                                    isDisplayingText = false
-                                    _TextUI(false)
+                                if not Config.ProgressBar or (Config.ProgressBar and _ProgressBar()) then
+                                    TriggerServerEvent('bryan_airdrops:server:collectAirdrop', { airdropId = v.airdropId })
+                                    Citizen.Wait(1000)
                                 end
                             end
                         elseif Config.CollectionType == 'textui' and isDisplayingText then

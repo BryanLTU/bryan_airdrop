@@ -70,8 +70,11 @@ _AddTarget = function(id, netId)
             icon = 'fa-solid fa-parachute-box',
             iconColor = '#5BC687',
             distance = 3.0,
-            serverEvent = 'bryan_airdrops:server:collectAirdrop',
-            airdropId = id
+            onSelect = function()
+                if not Config.ProgressBar or (Config.ProgressBar and _ProgressBar()) then
+                    TriggerServerEvent('bryan_airdrops:server:collectAirdrop', { airdropId = id })
+                end
+            end
         },
     })
 end
@@ -86,4 +89,18 @@ _GeneratePlate = function()
     elseif Config.Framework == 'qbcore' then
         -- TODO QB compatibility
     end
+end
+
+_ProgressBar = function()
+    return lib.progressBar({
+        duration = 10000,
+        label = locale('progress_bar_picking_up'),
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = true,
+            car = true,
+            combat = true,
+        }
+    })
 end
